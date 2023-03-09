@@ -96,9 +96,9 @@ class qtApp(QWidget) :
             #imgLabel.re
 
             #테스트
-            f = open(f'./studyPyQt/temp/image_{i+1}.png', mode='wb') # 파일쓰기
-            f.write(data)
-            f.close()
+            #f = open(f'./studyPyQt/temp/image_{i+1}.png', mode='wb') # 파일쓰기
+            #f.write(data)
+            #f.close()
 
             self.tblResult.setItem(i, 0, QTableWidgetItem(title))
             self.tblResult.setItem(i, 1, QTableWidgetItem(pubDate))
