@@ -21,8 +21,8 @@
   - Python 3.11.2
   - Qt Designer
   - Naver OpenAPI
-  - Urllib.request 이미지다운로드 사용 *
-
+  - urllib.request 이미지다운로드 사용 *
+<img src = "https://raw.githubusercontent.com/soo-jin-lim/miniprojects/main/images/NaverMovie.png" width ="780">
 
 ## DB연동 GUI 개발학습
 
