@@ -26,6 +26,18 @@
 
 ## DB연동 GUI 개발학습
 
+ TTS(Text To Speech)
+  - gtts 모듈
+  - playsound 모듈
+
+- 암호해제 프로그램
+  - itertools, zipfile 기본모듈
+ 
+ 스레드 사용법
+ - gui와 처리시간이 긴 로직을 사용하면 반드시 쓰래드 사용
+
+ 이메일 보내기 앱
+ 
 ## 미니프로그램 실습
 
 ## 파이썬 관련 추가학습
