@@ -44,7 +44,11 @@
  -  QR코드 생성
   - qrcode 모듈
   - pyQt
- ![QR코드 앱]()
+<img src = "https://raw.githubusercontent.com/soo-jin-lim/miniprojects/main/images/Qr.png" width ="780">
+
+
+- 주소록 생성
+<img src = "https://raw.githubusercontent.com/soo-jin-lim/miniprojects/main/images/주소록.png" width ="780">
  
 판단
 구조, 알리미, 데이터
