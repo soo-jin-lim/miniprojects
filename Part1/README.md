@@ -37,6 +37,7 @@
  - gui와 처리시간이 긴 로직을 사용하면 반드시 쓰래드 사용
 
  이메일 보내기 앱
+ - 게임 만들기 <img src = "https://raw.githubusercontent.com/soo-jin-lim/miniprojects/main/images/pygame.png" width ="780">
  
 ## 미니프로그램 실습
 
