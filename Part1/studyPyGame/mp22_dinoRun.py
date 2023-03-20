@@ -7,7 +7,8 @@ pygame.init()
 
 ASSETS = './studyPyGame/Assets/' 
 SCREEN_WIDTH = 1100
-SCREEN = pygame.display.set_mode((SCREEN_WIDTH, 600))
+SCREEN_HEIGHT = 600
+SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 icon = pygame.image.load('./studyPyGame/dinoRun.png')
 pygame.display.set_icon(icon)
 #배경이미지 로드
@@ -15,11 +16,11 @@ BG = pygame.image.load(os.path.join(f'{ASSETS}Other', 'Track.png'))
 #공룡이미지 로드
 RUNNING = [pygame.image.load(f'{ASSETS}Dino/Dinorun1.png'),
            pygame.image.load(f'{ASSETS}Dino/Dinorun2.png')]
-
 DUCKING = [pygame.image.load(f'{ASSETS}Dino/DinoDuck1.png'),
-         pygame.image.load(f'{ASSETS}Dino/DinoDuck2.png')] #Dodge
-
+           pygame.image.load(f'{ASSETS}Dino/DinoDuck2.png')] #Dodge
 JUMPING = pygame.image.load(f'{ASSETS}Dino/DinoJump.png')
+START = pygame.image.load(f'{ASSETS}Dino/DinoStart.png') # 첫시작 이미지
+DEAD = pygame.image.load(f'{ASSETS}Dino/DinoDead.png') # 죽음 이미지
 #구름이미지
 CLOUD = pygame.image.load(f'{ASSETS}Other/Cloud.png')
 #익룡이미지 로드
@@ -29,7 +30,7 @@ BIRD = [pygame.image.load(f'{ASSETS}Bird/Bird1.png'),
 LARGE_CACTUS = [pygame.image.load(f'{ASSETS}Cactus/LargeCactus1.png'),
                 pygame.image.load(f'{ASSETS}Cactus/LargeCactus2.png'),
                 pygame.image.load(f'{ASSETS}Cactus/LargeCactus3.png')]
-SMALL_CATUS = [pygame.image.load(f'{ASSETS}Cactus/SmallCactus1.png'),
+SMALL_CACTUS = [pygame.image.load(f'{ASSETS}Cactus/SmallCactus1.png'),
                 pygame.image.load(f'{ASSETS}Cactus/SmallCactus2.png'),
                 pygame.image.load(f'{ASSETS}Cactus/SmallCactus3.png')]
 
@@ -136,7 +137,7 @@ class Obstacle: #장애물 클래스(부모)
     def draw(self,SCREEN) -> None:
         SCREEN.blit(self.image[self.type],self.rect)
 
-class Bird(Obstacle):
+class Bird(Obstacle): # 장애물 클래스 상속클래스
     def __init__(self, image) -> None:
         self.type = 0 # 새는 0
         super().__init__(image, self.type)
@@ -151,19 +152,18 @@ class Bird(Obstacle):
     
 class LargeCactus(Obstacle):
     def __init__(self, image) -> None:
-        self.type =random.randint(0, 2)
-        super().__init__(image,self.type)
-        self.rect.y =300
+        self.type = random.randint(0, 2) # 큰 선인장 세개니까 하나를 고름
+        super().__init__(image, self.type)
+        self.rect.y = 300
 
 class SmallCactus(Obstacle):
     def __init__(self, image) -> None:
-        self.type =random.randint(0, 2)
-        super().__init__(image,self.type)
-        self.rect.y =325
-
+        self.type = random.randint(0, 2) # 작은 선인장 세개니까 하나를 고름
+        super().__init__(image, self.type)
+        self.rect.y = 325
 
 def main():
-    global game_speed, x_pos_bg, y_pos_bg,points, obstacles
+    global game_speed, x_pos_bg, y_pos_bg,points, obstacles, font
     x_pos_bg = 0
     y_pos_bg = 380
     points = 0 #게임 점수
@@ -173,6 +173,7 @@ def main():
     could = Cloud() # 구름객체 생성
     game_speed = 14
     obstacles = [] # 장애물 리스트
+    death_count = 0
     
     font = pygame.font.Font(f'{ASSETS}NanumGothicBold.ttf', size=20)# 나중에 나눔고딕으로 변경
 
@@ -217,25 +218,63 @@ def main():
         dino.update(userInput)
 
         if len(obstacles) == 0:
-            if random.randint(0, 2) == 0: #작은 선인장
-                obstacles.append(Bird(BIRD))
-        
+            if random.randint(0, 2) == 0: # 작은 선인장
+                obstacles.append(SmallCactus(SMALL_CACTUS))
             elif random.randint(0, 2) == 1: # 큰 선인장
-                obstacles.append(SmallCactus(SMALL_CATUS))
-    
-            elif random.randint(0, 2) == 2: # 새
-                obstacles.append(SmallCactus(LARGE_CACTUS))
-
-
+                obstacles.append(LargeCactus(LARGE_CACTUS))
+            elif random.randint(0, 2) == 1: # 큰 선인장
+                obstacles.append(Bird(BIRD))
+            
 
         for obs in obstacles:
             obs.draw(SCREEN)
             obs.update()
+            # Collision Detection 충돌감지
             if dino.dino_rect.colliderect(obs.rect):
-                pygame.draw.rect(SCREEN, (255,0,0), dino.dino_rect, 3)
-        
-        clock.tick(3ㄴㄴ0) #30이 기본 60이면 빨라짐
+                # pygame.draw.rect(SCREEN, (255,0,0), dino.dino_rect, 3)
+                pygame.time.delay(1500) # 1.5초
+                death_count += 1
+                menu(death_count) # 메인 메뉴화면으로 전환
+
+        clock.tick(30) #30이 기본 60이면 빨라짐
         pygame.display.update() #초당 30번 수행
 
+def menu(death_count): # 메뉴함수
+    global points, font
+    run = True
+    font = pygame.font.Font(f'{ASSETS}NanumGothicBold.ttf', 20)# 나중에 나눔고딕으로 변경
+
+    while run: 
+        SCREEN.fill((255,255,255))
+
+        if death_count == 0: # 최초
+            text = font.render('시작하려면 아무키나 누르세요', True, (83,83,83))
+            SCREEN.blit(START, (SCREEN_WIDTH // 2 - 20, SCREEN_HEIGHT // 2 - 140))
+        elif death_count > 0: # 죽음
+            text = font.render('재시작하려면 아무키나 누르세요', True, (83,83,83))
+            score = font.render(f'SCORE : {points}', True, (83,83,83))
+            scoreRect = score.get_rect()
+            scoreRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50 )
+            SCREEN.blit(score, scoreRect)
+            SCREEN.blit(DEAD, (SCREEN_WIDTH // 2 - 20, SCREEN_HEIGHT // 2 - 140))
+
+
+        textRect = text.get_rect()
+        textRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        SCREEN.blit(text, textRect)
+        
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+                pygame.quit # 완전종료
+                
+            if event.type == pygame.KEYDOWN:
+                main()
+
+
+
+
 if __name__ == '__main__':
-    main()
+    menu(death_count=0)

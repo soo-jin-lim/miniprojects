@@ -50,7 +50,17 @@
 
 - 주소록 생성
 <img src = "https://raw.githubusercontent.com/soo-jin-lim/miniprojects/main/images/주소록.png" width ="780">
- 
+
+ 게임화면
+ <img src = "https://raw.githubusercontent.com/soo-jin-lim/miniprojects/main/images/gamestart.png" width ="780">
+
+- 전국 대학교 위치맵
+<img src = "https://raw.githubusercontent.com/soo-jin-lim/miniprojects/main/images/map.png" width ="780">
+
+계산기
+- PyQt 
+- 16개의 시그널을 한개의 slot 함수로 처리
+ <img src = "https://raw.githubusercontent.com/soo-jin-lim/miniprojects/main/images/cal.png" width ="780">
 판단
 구조, 알리미, 데이터
 gui
