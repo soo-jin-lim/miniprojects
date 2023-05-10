@@ -6,7 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,80 +29,89 @@ namespace SmartHomeMonitoringApp.Views
     public partial class DataBaseControl : UserControl
     {
         public bool IsConnected { get; set; }
-
+        
+        Thread MqttThread { get; set; }//UI 컨트롤이 어려워짐.
         public DataBaseControl()
         {
             InitializeComponent();
         }
+
+
+        // 유저컨트롤 로드이벤트 핸들러
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             TxbBrokerUrl.Text = Commons.BROKERHOST;
             TxbMqttTopic.Text = Commons.MQTTTOPIC;
             TxtConnString.Text = Commons.MYSQL_CONNSTRING;
 
-            IsConnected = false;//아직 접속이 안되어있음
+            IsConnected = false;     // 아직 접속이 안되었음
             BtnConnDb.IsChecked = false;
         }
-        //토글버튼 클릭 이벤트 핸들러
+
+        // 토글버튼 클릭이벤트 핸들러
         private void BtnConnDb_Click(object sender, RoutedEventArgs e)
         {
             if (IsConnected == false)
             {
-                BtnConnDb.IsChecked = true;
-                IsConnected = true;
-
-                //MQTT 브로커에 접속
+                // Mqtt 브로커 생성
                 Commons.MQTT_CLIENT = new uPLibrary.Networking.M2Mqtt.MqttClient(Commons.BROKERHOST);
 
                 try
                 {
-                    //Mqtt subscribe(구독할) 로직
+                    // Mqtt subscribe(구독할) 로직
                     if (Commons.MQTT_CLIENT.IsConnected == false)
                     {
-                        //Mqtt 접속
+
+                        
+                        // Mqtt 접속
                         Commons.MQTT_CLIENT.MqttMsgPublishReceived += MQTT_CLIENT_MqttMsgPublishReceived;
-                        Commons.MQTT_CLIENT.Connect("MONITOR");
-                        Commons.MQTT_CLIENT.Subscribe(new string[] { Commons.MQTTTOPIC }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE }); // QOS는 네트워크 통신에 옵션
+                        Commons.MQTT_CLIENT.Connect("MONITOR"); // clientId = 모니터
+                        Commons.MQTT_CLIENT.Subscribe(new string[] { Commons.MQTTTOPIC },
+                                new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE }); // QOS는 네트워크 통신에 옵선
                         UpdateLog(">>> MQTT Broker Connected");
 
                         BtnConnDb.IsChecked = true;
-                        IsConnected = true; // 예외가 발생하면 true 변경할 필요없습
-
-
+                        BtnConnDb.Content = "Mqtt 연결중";
+                        IsConnected = true; // 예외발생하면 true로 변경할 필요 없음
                     }
                 }
-                catch 
-                { 
-                    //pass
+                catch(Exception ex)
+                {
+                    UpdateLog($"!!! MQTT 에러발생 : {ex.Message}");
                 }
-
             }
             else
             {
+                if(Commons.MQTT_CLIENT.IsConnected)
+                {
+                    Commons.MQTT_CLIENT.MqttMsgPublishReceived -= MQTT_CLIENT_MqttMsgPublishReceived;
+                    Commons.MQTT_CLIENT.Disconnect();
+                    UpdateLog(">>> Mqtt Broker Disconnected...");
+                }
                 BtnConnDb.IsChecked = false;
                 IsConnected = false;
-
             }
         }
+
         private void UpdateLog(string msg)
         {
+            // 예외처리 필요!!
             this.Invoke(() => {
                 TxtLog.Text += $"{msg}\n";
                 TxtLog.ScrollToEnd();
-
             });
-
         }
-        //Subscribe가 발생할 때 이벤트 핸들러
-        private void MQTT_CLIENT_MqttMsgPublishReceived(object sender, uPLibrary.Networking.M2Mqtt.Messages.MqttMsgPublishEventArgs e)
+
+        // Subscribe가 발생할 때 이벤트핸들러
+        private void MQTT_CLIENT_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
             var msg = Encoding.UTF8.GetString(e.Message);
             UpdateLog(msg);
-            SetTodataBase(msg, e.Topic);
-
+            SetToDataBase(msg, e.Topic); // 실제 DB에 저장처리
         }
 
-        private void SetTodataBase(string msg, string topic)
+        // DB 저장처리 메서드
+        private void SetToDataBase(string msg, string topic)
         {
             var currValue = JsonConvert.DeserializeObject<Dictionary<string, string>>(msg);
             if (currValue != null)
@@ -115,22 +126,41 @@ namespace SmartHomeMonitoringApp.Views
                     using (MySqlConnection conn = new MySqlConnection(Commons.MYSQL_CONNSTRING))
                     {
                         if (conn.State == System.Data.ConnectionState.Closed) conn.Open();
-                        string insQuery = "INSERT INTO smarthomesensor ...";
+                        string insQuery = @"INSERT INTO smarthomesensor 
+                                            (Home_Id,
+                                            Room_Name,
+                                            Sensing_DateTime,
+                                            Temp,
+                                            Humid)
+                                            Value
+                                            (@Home_Id,
+                                            @Room_Name,
+                                            @Sensing_DateTime,
+                                            @Temp,
+                                            @Humid)" ;
 
                         MySqlCommand cmd = new MySqlCommand(insQuery, conn);
                         cmd.Parameters.AddWithValue("@Home_Id", currValue["Home_Id"]);
-                        if(cmd.ExecuteNonQuery()==1)
+                        cmd.Parameters.AddWithValue("@Room_Name", currValue["Room_Name"]);
+                        cmd.Parameters.AddWithValue("@Sensing_DateTime", currValue["Sensing_DateTime"]);
+                        cmd.Parameters.AddWithValue("@Temp", currValue["Temp"]);
+                        cmd.Parameters.AddWithValue("@Humid", currValue["Humid"]);
+
+                        // ... 파라미터 다섯개 
+                        if (cmd.ExecuteNonQuery() == 1)
                         {
-                            UpdateLog(">>> DB Insert succeed");
+                            UpdateLog(">>> DB Insert succeed.");
                         }
                         else
                         {
-                            UpdateLog(">>> DB Insert failed");
+                            UpdateLog(">>> DB Insert failed."); // 일어날일이 거의 없음
                         }
                     }
-                    
-
-
+                }
+                catch (Exception ex)
+                {
+                    UpdateLog($"!!! Erorr 발생 : {ex.Message}");
+                }
             }
         }
     }
