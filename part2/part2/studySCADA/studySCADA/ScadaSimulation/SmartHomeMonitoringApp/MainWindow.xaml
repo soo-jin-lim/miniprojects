@@ -10,7 +10,7 @@
     mc:Ignorable="d"
     Title="SmartHome Monitoring System" Height="450" Width="800" 
     MinHeight="450" MinWidth="670"
-    Loaded="MetroWindow_Loaded" >
+    Loaded="MetroWindow_Loaded" Closing="MetroWindow_Closing">
     <mah:MetroWindow.IconTemplate>
         <DataTemplate>
             <iconPacks:PackIconSimpleIcons Kind="HomeAssistant" Width="24"
@@ -19,7 +19,8 @@
     </mah:MetroWindow.IconTemplate>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />     <!-- 내부의 컨트롤의 높이를 따라감 -->
+            <RowDefinition Height="Auto" />
+            <!-- 내부에 컨트롤의 높이 따라감 -->
             <RowDefinition Height="1*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -37,15 +38,15 @@
                             <iconPacks:PackIconJamIcons Kind="PlayCircleF" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem x:Name="MnuStopSubscribe" Header="중지">
+                    <!--<MenuItem x:Name="MnuStopSubscribe" Header="중지">
                         <MenuItem.Icon>
                             <iconPacks:PackIconBootstrapIcons Kind="PauseCircleFill" />
                         </MenuItem.Icon>
-                    </MenuItem>
+                    </MenuItem>-->
                     <Separator />
                     <MenuItem x:Name="MnuExitProgram" Header="끝내기" Click="MnuExitProgram_Click">
                         <MenuItem.Icon>
-                            <iconPacks:PackIconForkAwesome Kind="SignOut"/>
+                            <iconPacks:PackIconForkAwesome Kind="SignOut" />
                         </MenuItem.Icon>
                     </MenuItem>
                 </MenuItem>
@@ -54,19 +55,21 @@
                         <iconPacks:PackIconJamIcons Kind="ScreenF" />
                     </MenuItem.Icon>
 
-                    <MenuItem x:Name="MnuDataBaseMon" Header="DB 모니터링">
+                    <MenuItem x:Name="MnuDataBaseMon" Header="DB모니터링" Click="MnuDataBaseMon_Click">
                         <MenuItem.Icon>
                             <iconPacks:PackIconOcticons Kind="Database" />
                         </MenuItem.Icon>
                     </MenuItem>
-
-                    <MenuItem x:Name="MnuVisualizationMon" Header="시각화">
+                    <MenuItem x:Name="MnuRealTimeMon" Header="실시간모니터링" Click="MnuRealTimeMon_Click">
+                        <MenuItem.Icon>
+                            <iconPacks:PackIconMaterial Kind="GaugeLow" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem x:Name="MnuVisualizationMon" Header="시각화" Click="MnuVisualizationMon_Click">
                         <MenuItem.Icon>
                             <iconPacks:PackIconMaterial Kind="ChartMultiline" />
                         </MenuItem.Icon>
                     </MenuItem>
-                   
-                    
                 </MenuItem>
                 <MenuItem Header="디자인">
                     <MenuItem.Icon>
@@ -77,6 +80,7 @@
                     <MenuItem.Icon>
                         <iconPacks:PackIconMaterial Kind="HelpBox" />
                     </MenuItem.Icon>
+
                     <MenuItem x:Name="MnuAbout" Header="이 프로그램">
                         <MenuItem.Icon>
                             <iconPacks:PackIconBoxIcons Kind="SolidInfoSquare" />
@@ -87,29 +91,29 @@
 
             <ToolBarTray>
                 <ToolBar Style="{StaticResource MahApps.Styles.ToolBar}">
-                    <Button x:Name="BtnStartSubscribe" ToolTip="구독시작"  Click="MnuStartSubscribe_Click">
-                        <iconPacks:PackIconJamIcons Kind="PlayCircleF"/>
+                    <Button x:Name="BtnStartSubscribe" ToolTip="구독 시작" Click="MnuStartSubscribe_Click">
+                        <iconPacks:PackIconJamIcons Kind="PlayCircleF" />
                     </Button>
-                    <Button x:Name="BtnStopSubscribe" ToolTip="구독중지">
-                            <iconPacks:PackIconBootstrapIcons Kind="PauseCircleFill"/>
-                    </Button>
+                    <!--<Button x:Name="BtnStopSubscribe" ToolTip="구독 중지">
+                        <iconPacks:PackIconBootstrapIcons Kind="PauseCircleFill" />
+                    </Button>-->
                     <Separator />
-                    <Button x:Name="BtnExitProgram" ToolTip="프로그램 끝내기" Click="BtnExitprogram_Click">
-                        <iconPacks:PackIconForkAwesome Kind="SignOut"/>
+                    <Button x:Name="BtnExitProgram" ToolTip="프로그램 끝내기" Click="BtnExitProgram_Click">
+                        <iconPacks:PackIconForkAwesome Kind="SignOut" />
                     </Button>
                 </ToolBar>
             </ToolBarTray>
-            
         </StackPanel>
-        <Grid Grid.Row="1" >
+
+        <Grid Grid.Row="1">
             <!-- UserControl embed 가능 -->
             <ContentControl x:Name="ActiveItem" Background="Gainsboro" />
         </Grid>
 
-        <StatusBar Grid.Row="2" >
+        <StatusBar Grid.Row="2">
             <StatusBarItem>SmartHome Solution</StatusBarItem>
-            <Separator Style="{StaticResource MahApps.Styles.Separator.StatusBar}"/>
-            <StatusBarItem>선택화면</StatusBarItem>
+            <Separator Style="{StaticResource MahApps.Styles.Separator.StatusBar}" />
+            <StatusBarItem>선택화면 :</StatusBarItem>
             <StatusBarItem x:Name="StsSelScreen"></StatusBarItem>
         </StatusBar>
     </Grid>
